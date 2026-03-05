@@ -1,0 +1,537 @@
+basePath: /api/v1
+definitions:
+  models.CreateUserRequest:
+    description: Request body for creating a new user
+    properties:
+      age:
+        example: 25
+        maximum: 150
+        minimum: 1
+        type: integer
+      email:
+        example: nguyenvana@example.com
+        type: string
+      name:
+        example: Nguyen Van A
+        type: string
+    required:
+    - age
+    - email
+    - name
+    type: object
+  models.ErrorResponse:
+    description: Standard error response
+    properties:
+      code:
+        example: 400
+        type: integer
+      detail:
+        example: Field 'name' is required
+        type: string
+      message:
+        example: Bad Request
+        type: string
+    type: object
+  models.PatchUserRequest:
+    description: Request body for partial update of a user (PATCH)
+    properties:
+      age:
+        example: 28
+        type: integer
+      email:
+        example: nguyenvanc@example.com
+        type: string
+      is_active:
+        example: false
+        type: boolean
+      name:
+        example: Nguyen Van C
+        type: string
+    type: object
+  models.SuccessResponse:
+    description: Standard success response
+    properties:
+      code:
+        example: 200
+        type: integer
+      data: {}
+      message:
+        example: OK
+        type: string
+    type: object
+  models.UpdateUserRequest:
+    description: Request body for full update of a user (PUT)
+    properties:
+      age:
+        example: 30
+        maximum: 150
+        minimum: 1
+        type: integer
+      email:
+        example: nguyenvanb@example.com
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: Nguyen Van B
+        type: string
+    required:
+    - age
+    - email
+    - name
+    type: object
+  models.User:
+    description: User account information
+    properties:
+      age:
+        example: 25
+        type: integer
+      email:
+        example: nguyenvana@example.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: Nguyen Van A
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI Specification
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact:
+    email: demo@example.com
+    name: Demo Support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+paths:
+  /demo/status/1xx:
+    get:
+      description: |-
+        Demonstrates 1xx status codes. In HTTP/1.1, 102 Processing indicates the server is working but hasn't finished yet.
+        **Note:** 1xx codes are not normally used directly in REST API response bodies; this demo simulates them via JSON.
+      parameters:
+      - description: 1xx status code to demo (100, 101, 102, 103)
+        enum:
+        - 100
+        - 101
+        - 102
+        - 103
+        in: query
+        name: code
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "100":
+          description: Continue
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "101":
+          description: Switching Protocols
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "102":
+          description: Processing
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "103":
+          description: Early Hints
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+      summary: Demo 1xx status codes - Informational
+      tags:
+      - HTTP Status Codes Demo
+  /demo/status/2xx:
+    get:
+      description: 'Demonstrates success codes: 200 OK, 201 Created, 202 Accepted,
+        204 No Content, 206 Partial Content.'
+      parameters:
+      - description: 2xx status code to demo
+        enum:
+        - 200
+        - 201
+        - 202
+        - 204
+        - 206
+        in: query
+        name: code
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "204":
+          description: No Content
+        "206":
+          description: Partial Content
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+      summary: Demo 2xx status codes - Success
+      tags:
+      - HTTP Status Codes Demo
+  /demo/status/3xx:
+    get:
+      description: 'Demonstrates redirect codes: 301 Moved Permanently, 302 Found,
+        304 Not Modified, 307 Temporary Redirect, 308 Permanent Redirect.'
+      parameters:
+      - description: 3xx status code to demo
+        enum:
+        - 301
+        - 302
+        - 304
+        - 307
+        - 308
+        in: query
+        name: code
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "301":
+          description: Moved Permanently
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "302":
+          description: Found (Temporary Redirect)
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "304":
+          description: Not Modified
+        "307":
+          description: Temporary Redirect
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+        "308":
+          description: Permanent Redirect
+          schema:
+            $ref: '#/definitions/models.SuccessResponse'
+      summary: Demo 3xx status codes - Redirection
+      tags:
+      - HTTP Status Codes Demo
+  /demo/status/4xx:
+    get:
+      description: 'Demonstrates client-side errors: 400, 401, 403, 404, 405, 408,
+        409, 410, 422, 429.'
+      parameters:
+      - description: 4xx status code to demo
+        enum:
+        - 400
+        - 401
+        - 403
+        - 404
+        - 405
+        - 408
+        - 409
+        - 410
+        - 422
+        - 429
+        in: query
+        name: code
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "405":
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "408":
+          description: Request Timeout
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "410":
+          description: Gone
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Demo 4xx status codes - Client Error
+      tags:
+      - HTTP Status Codes Demo
+  /demo/status/5xx:
+    get:
+      description: 'Demonstrates server-side errors: 500, 501, 502, 503, 504, 507.'
+      parameters:
+      - description: 5xx status code to demo
+        enum:
+        - 500
+        - 501
+        - 502
+        - 503
+        - 504
+        - 507
+        in: query
+        name: code
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "501":
+          description: Not Implemented
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "504":
+          description: Gateway Timeout
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "507":
+          description: Insufficient Storage
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Demo 5xx status codes - Server Error
+      tags:
+      - HTTP Status Codes Demo
+  /users:
+    get:
+      description: Returns a list of all users in the system. Demonstrates HTTP 200
+        OK.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of users
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.User'
+                  type: array
+              type: object
+      summary: Get all users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user in the system. Demonstrates HTTP 201 Created,
+        400 Bad Request, 409 Conflict.
+      parameters:
+      - description: User information to create
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "409":
+          description: Email already exists
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Create a new user
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      description: Removes a user from the system. Demonstrates HTTP 204 No Content,
+        404 Not Found.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Deleted successfully, no content returned
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Delete a user
+      tags:
+      - Users
+    get:
+      description: Returns detailed information of a user. Demonstrates HTTP 200,
+        400, 404.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User information
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get user by ID
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      description: Updates only the provided fields. Demonstrates HTTP 200, 400, 404.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Fields to update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.PatchUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update successful
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Invalid data
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Partial update of a user (PATCH)
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Replaces all user information. Demonstrates HTTP 200, 400, 404.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Complete new user information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Update successful
+          schema:
+            allOf:
+            - $ref: '#/definitions/models.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Invalid data
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Full update of a user (PUT)
+      tags:
+      - Users
+swagger: "2.0"
