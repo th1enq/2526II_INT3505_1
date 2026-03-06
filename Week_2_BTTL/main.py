@@ -15,15 +15,6 @@ users = [
     {"id": 2, "name": "Bob"}
 ]
 
-# GET /users
-# Cacheable: response có header Cache-Control
-@app.route("/users", methods=["GET"])
-def get_users():
-    response = make_response(jsonify(users))
-    response.headers["Cache-Control"] = "public, max-age=60"
-    return response
-
-
 # GET /users/<id>
 @app.route("/users/<int:user_id>", methods=["GET"])
 def get_user(user_id):
