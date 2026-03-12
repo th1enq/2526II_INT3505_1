@@ -1,2 +1,4 @@
 flask>=3.0.0
-flasgger>=0.9.7.1
+flask-smorest>=0.44.0
+marshmallow>=3.20.0
+pyyaml>=6.0
