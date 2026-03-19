@@ -1,0 +1,270 @@
+paths:
+  /api/v1/books:
+    get:
+      parameters:
+      - in: query
+        name: author
+        schema:
+          type: string
+          default: null
+          nullable: true
+        required: false
+      - in: query
+        name: genre
+        schema:
+          type: string
+          default: null
+          nullable: true
+        required: false
+      - in: query
+        name: in_stock
+        schema:
+          type: boolean
+          default: null
+          nullable: true
+        required: false
+      - in: query
+        name: min_price
+        schema:
+          type: number
+          default: null
+          minimum: 0.0
+          nullable: true
+        required: false
+      - in: query
+        name: max_price
+        schema:
+          type: number
+          default: null
+          minimum: 0.0
+          nullable: true
+        required: false
+      - in: query
+        name: sort
+        schema:
+          type: string
+          default: null
+          enum:
+          - id
+          - title
+          - author
+          - price
+          - published_year
+          - null
+          nullable: true
+        required: false
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+        required: false
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 100
+        required: false
+      responses:
+        '422':
+          $ref: '#/components/responses/UNPROCESSABLE_CONTENT'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBooks'
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      summary: List books with filters, sorting, and pagination
+      tags:
+      - books
+    post:
+      responses:
+        '422':
+          $ref: '#/components/responses/UNPROCESSABLE_CONTENT'
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      summary: Create a new book
+      tags:
+      - books
+  /api/v1/books/{book_id}:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      summary: Get book by ID.
+      description: Returns detailed information for a single book.
+      tags:
+      - books
+    put:
+      responses:
+        '422':
+          $ref: '#/components/responses/UNPROCESSABLE_CONTENT'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      summary: Replace a book
+      tags:
+      - books
+    delete:
+      responses:
+        '204':
+          description: No Content
+        default:
+          $ref: '#/components/responses/DEFAULT_ERROR'
+      summary: Delete a book by ID
+      tags:
+      - books
+    parameters:
+    - in: path
+      name: book_id
+      required: true
+      schema:
+        type: integer
+        minimum: 0
+info:
+  title: Book Management API
+  version: v1
+tags:
+- name: books
+  description: Operations on book resources
+openapi: 3.0.3
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Error code
+        status:
+          type: string
+          description: Error name
+        message:
+          type: string
+          description: Error message
+        errors:
+          type: object
+          description: Errors
+          additionalProperties: {}
+      additionalProperties: false
+    PaginationMetadata:
+      type: object
+      properties:
+        total:
+          type: integer
+        total_pages:
+          type: integer
+        first_page:
+          type: integer
+        last_page:
+          type: integer
+        page:
+          type: integer
+        previous_page:
+          type: integer
+        next_page:
+          type: integer
+      additionalProperties: false
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          example: 1
+        title:
+          type: string
+          example: Clean Architecture
+        author:
+          type: string
+          example: Robert C. Martin
+        isbn:
+          type: string
+          example: '9780134494166'
+        published_year:
+          type: integer
+          example: 2017
+        genre:
+          type: string
+          example: Software Engineering
+        price:
+          type: number
+          example: 45.5
+        stock:
+          type: integer
+          minimum: 0
+          example: 20
+        in_stock:
+          type: boolean
+          readOnly: true
+          example: true
+      required:
+      - author
+      - genre
+      - isbn
+      - price
+      - published_year
+      - stock
+      - title
+      additionalProperties: false
+    PaginatedBooks:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Book'
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+      additionalProperties: false
+  responses:
+    UNPROCESSABLE_CONTENT:
+      description: Unprocessable Content
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    DEFAULT_ERROR:
+      description: Default error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
