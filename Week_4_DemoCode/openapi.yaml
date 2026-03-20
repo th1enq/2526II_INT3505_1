@@ -1,3 +1,10 @@
+servers:
+- url: /
+  description: Current host
+- url: http://159.223.38.173:5001
+  description: Server
+- url: https://159.223.38.173:5001
+  description: Server HTTPS
 paths:
   /api/v1/books:
     get:
@@ -158,19 +165,6 @@ paths:
 info:
   title: Book Management API
   version: v1
-servers:
-- url: '{baseUrl}'
-  description: API server by environment
-  variables:
-    baseUrl:
-      default: http://127.0.0.1:8000
-      enum:
-      - http://127.0.0.1:8000
-      - https://dev-api.example.com
-      - https://staging-api.example.com
-      - http://159.223.38.173
-      - https://api.example.com
-      description: Select the target environment URL
 tags:
 - name: books
   description: Operations on book resources

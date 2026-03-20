@@ -1,0 +1,141 @@
+openapi: 3.0.0
+info:
+  title: Product Management API
+  version: 0.0.0
+tags:
+  - name: products
+paths:
+  /api/products:
+    get:
+      operationId: Products_listProducts
+      summary: Get all products
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+      tags:
+        - products
+    post:
+      operationId: Products_createProduct
+      summary: Create a new product
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+      tags:
+        - products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+  /api/products/{product_id}:
+    get:
+      operationId: Products_getProduct
+      summary: Get a product by ID
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+      tags:
+        - products
+    put:
+      operationId: Products_updateProduct
+      summary: Update a product
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+      tags:
+        - products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+    delete:
+      operationId: Products_deleteProduct
+      summary: Delete a product
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+      tags:
+        - products
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Product ID
+        name:
+          type: string
+          description: Product name
+        price:
+          type: number
+          format: float
+          description: Product price
+        description:
+          type: string
+          description: Product description
+    ProductInput:
+      type: object
+      required:
+        - name
+        - price
+      properties:
+        name:
+          type: string
+          description: Product name
+        price:
+          type: number
+          format: float
+          description: Product price
+        description:
+          type: string
+          description: Product description

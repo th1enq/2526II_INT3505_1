@@ -1,0 +1,187 @@
+{
+  "swagger": "2.0",
+  "basePath": "/",
+  "paths": {
+    "/api/products/": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          }
+        },
+        "summary": "Create a new product",
+        "operationId": "create_product",
+        "parameters": [
+          {
+            "name": "payload",
+            "required": true,
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ProductInput"
+            }
+          }
+        ],
+        "tags": [
+          "products"
+        ]
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Product"
+              }
+            }
+          }
+        },
+        "summary": "Get all products",
+        "operationId": "list_products",
+        "tags": [
+          "products"
+        ]
+      }
+    },
+    "/api/products/{product_id}": {
+      "parameters": [
+        {
+          "name": "product_id",
+          "in": "path",
+          "required": true,
+          "type": "integer"
+        }
+      ],
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          }
+        },
+        "summary": "Update a product",
+        "operationId": "update_product",
+        "parameters": [
+          {
+            "name": "payload",
+            "required": true,
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ProductInput"
+            }
+          }
+        ],
+        "tags": [
+          "products"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        },
+        "summary": "Delete a product",
+        "operationId": "delete_product",
+        "tags": [
+          "products"
+        ]
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Product"
+            }
+          }
+        },
+        "summary": "Get a product by ID",
+        "operationId": "get_product",
+        "tags": [
+          "products"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Product Management API",
+    "version": "1.0.0",
+    "description": "A simple API for managing products"
+  },
+  "produces": [
+    "application/json"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "tags": [
+    {
+      "name": "products",
+      "description": "Product operations"
+    }
+  ],
+  "definitions": {
+    "ProductInput": {
+      "required": [
+        "name",
+        "price"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Product name"
+        },
+        "price": {
+          "type": "number",
+          "description": "Product price"
+        },
+        "description": {
+          "type": "string",
+          "description": "Product description"
+        }
+      },
+      "type": "object"
+    },
+    "Product": {
+      "required": [
+        "id",
+        "name",
+        "price"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Product ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Product name"
+        },
+        "price": {
+          "type": "number",
+          "description": "Product price"
+        },
+        "description": {
+          "type": "string",
+          "description": "Product description"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "responses": {
+    "ParseError": {
+      "description": "When a mask can't be parsed"
+    },
+    "MaskError": {
+      "description": "When any error occurs on mask"
+    }
+  }
+}

@@ -1,0 +1,4 @@
+Flask==2.3.3
+Flask-CORS==4.0.0
+flask-restx==0.5.1
+pyyaml==6.0.1

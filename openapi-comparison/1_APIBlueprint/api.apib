@@ -1,0 +1,50 @@
+FORMAT: 1A
+HOST: /
+
+# Product Management API
+A simple API for managing products
+
+## Group Products
+Product operations
+
+### Products Collection [/api/products]
+
+#### Get all products [GET]
++ Response 200 (application/json)
+    + Attributes (array[Product])
+
+#### Create a new product [POST]
++ Request (application/json)
+    + Attributes (ProductInput)
++ Response 201 (application/json)
+    + Attributes (Product)
+
+### Product [/api/products/{product_id}]
++ Parameters
+    + product_id: 1 (number, required) - Product ID
+
+#### Get a product by ID [GET]
++ Response 200 (application/json)
+    + Attributes (Product)
+
+#### Update a product [PUT]
++ Request (application/json)
+    + Attributes (ProductInput)
++ Response 200 (application/json)
+    + Attributes (Product)
+
+#### Delete a product [DELETE]
++ Response 200 (application/json)
+
+## Data Structures
+
+### ProductInput
++ name: `Awesome Product` (string, required) - Product name
++ price: 99.99 (number, required) - Product price
++ description: `A very awesome product` (string, optional) - Product description
+
+### Product
++ id: 1 (number, required) - Product ID
++ name: `Awesome Product` (string, required) - Product name
++ price: 99.99 (number, required) - Product price
++ description: `A very awesome product` (string, optional) - Product description

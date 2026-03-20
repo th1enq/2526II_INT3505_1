@@ -1,0 +1,80 @@
+#%RAML 1.0
+title: Product Management API
+version: 1.0.0
+description: A simple API for managing products
+mediaType: application/json
+baseUri: /
+
+types:
+  ProductInput:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Product name
+      price:
+        type: number
+        description: Product price
+      description:
+        type: string
+        description: Product description
+        required: false
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Product ID
+      name:
+        type: string
+        description: Product name
+      price:
+        type: number
+        description: Product price
+      description:
+        type: string
+        description: Product description
+        required: false
+
+/api/products:
+  get:
+    description: Get all products
+    responses:
+      200:
+        description: Success
+        body:
+          type: Product[]
+  post:
+    description: Create a new product
+    body:
+      type: ProductInput
+    responses:
+      201:
+        description: Success
+        body:
+          type: Product
+  /{product_id}:
+    uriParameters:
+      product_id:
+        type: integer
+    get:
+      description: Get a product by ID
+      responses:
+        200:
+          description: Success
+          body:
+            type: Product
+    put:
+      description: Update a product
+      body:
+        type: ProductInput
+      responses:
+        200:
+          description: Success
+          body:
+            type: Product
+    delete:
+      description: Delete a product
+      responses:
+        200:
+          description: Success

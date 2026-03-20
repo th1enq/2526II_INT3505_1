@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@typespec/http": "^1.10.0",
+    "@typespec/openapi3": "^1.10.0"
+  }
+}
