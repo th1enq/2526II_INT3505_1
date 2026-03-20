@@ -17,13 +17,13 @@ def create_app():
         API_SPEC_OPTIONS={
             "servers": [
                 {
-                    "url": "http://127.0.0.1:5001",
-                    "description": "Local",
+                    "url": "/",
+                    "description": "Current host",
                 },
                 {
                     "url": "http://159.223.38.173:5001",
                     "description": "Server",
-                },
+                }
             ]
         },
     )
