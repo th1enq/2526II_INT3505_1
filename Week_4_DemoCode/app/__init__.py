@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_smorest import Api
 
 from .routes import register_routes
@@ -6,6 +7,7 @@ from .routes import register_routes
 
 def create_app():
     app = Flask(__name__)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
     app.config.update(
         API_TITLE="Book Management API",
         API_VERSION="v1",
@@ -23,6 +25,10 @@ def create_app():
                 {
                     "url": "http://159.223.38.173:5001",
                     "description": "Server",
+                },
+                {
+                    "url": "https://159.223.38.173:5001",
+                    "description": "Server HTTPS",
                 }
             ]
         },
