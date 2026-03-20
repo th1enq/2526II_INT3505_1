@@ -14,6 +14,18 @@ def create_app():
         OPENAPI_SWAGGER_UI_PATH="/docs",
         OPENAPI_SWAGGER_UI_URL="https://cdn.jsdelivr.net/npm/swagger-ui-dist/",
         OPENAPI_JSON_PATH="openapi.json",
+        API_SPEC_OPTIONS={
+            "servers": [
+                {
+                    "url": "http://127.0.0.1:5001",
+                    "description": "Local",
+                },
+                {
+                    "url": "http://159.223.38.173:5001",
+                    "description": "Server",
+                },
+            ]
+        },
     )
 
     api = Api(app)
