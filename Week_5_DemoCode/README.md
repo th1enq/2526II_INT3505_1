@@ -6,6 +6,29 @@ This demo supports a lecture on:
 - Pagination strategies: `offset/limit`, `page-based`, and `cursor`
 - Search endpoints with pagination for a library management system
 
+## Project Structure (production-style)
+
+```text
+Week_5_DemoCode/
+├── app.py
+├── app/
+│   ├── __init__.py            # App factory
+│   ├── config.py              # App config
+│   ├── extensions.py          # Swagger extension
+│   ├── api/
+│   │   ├── health.py          # /health
+│   │   ├── users.py           # /users/{id}/loans
+│   │   └── books.py           # /books* endpoints
+│   ├── services/
+│   │   └── library_service.py # Business logic
+│   ├── repositories/
+│   │   └── library_repository.py # Data access (in-memory)
+│   └── utils/
+│       └── pagination.py      # parse int, cursor encode/decode
+├── requirements.txt
+└── README.md
+```
+
 ## 1) Setup
 
 ```bash
