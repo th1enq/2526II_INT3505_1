@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
 
 from app.repositories.library_repository import library_repository
@@ -7,6 +8,19 @@ from app.utils.pagination import decode_cursor, encode_cursor
 
 
 class LibraryService:
+    @staticmethod
+    def list_users() -> Dict[str, Any]:
+        users = library_repository.list_users()
+        return {"total": len(users), "data": users}
+
+    @staticmethod
+    def get_user_detail(user_id: int) -> Optional[Dict[str, Any]]:
+        return library_repository.get_user(user_id)
+
+    @staticmethod
+    def get_book_detail(book_id: int) -> Optional[Dict[str, Any]]:
+        return library_repository.get_book(book_id)
+
     @staticmethod
     def search_books(query: str) -> List[Dict[str, Any]]:
         query_norm = query.lower().strip()
@@ -116,6 +130,53 @@ class LibraryService:
             },
             "data": rows,
         }
+
+    @staticmethod
+    def list_loans(status: str, offset: int, limit: int) -> Dict[str, Any]:
+        items = library_repository.list_loans()
+        if status in {"active", "returned"}:
+            items = [item for item in items if item["status"] == status]
+
+        total = len(items)
+        rows = items[offset : offset + limit]
+        return {
+            "pagination": {
+                "strategy": "offset-limit",
+                "offset": offset,
+                "limit": limit,
+                "returned": len(rows),
+                "total": total,
+            },
+            "data": rows,
+        }
+
+    @staticmethod
+    def create_user_loan(user_id: int, book_id: int, days: int = 14) -> Dict[str, Any]:
+        user = library_repository.get_user(user_id)
+        if not user:
+            return {"error": "User not found", "status": 404}
+
+        book = library_repository.get_book(book_id)
+        if not book:
+            return {"error": "Book not found", "status": 404}
+
+        if library_repository.is_book_on_active_loan(book_id):
+            return {"error": "Book is currently unavailable", "status": 409}
+
+        loan = library_repository.create_loan(user_id=user_id, book_id=book_id, days=days)
+        return {"status": 201, "data": loan}
+
+    @staticmethod
+    def return_loan(loan_id: int) -> Dict[str, Any]:
+        loan = library_repository.get_loan(loan_id)
+        if not loan:
+            return {"error": "Loan not found", "status": 404}
+
+        if loan["status"] == "returned":
+            return {"error": "Loan is already returned", "status": 409}
+
+        updated = library_repository.mark_loan_returned(loan_id)
+        return {"status": 200, "data": updated}
 
 
 library_service = LibraryService()

@@ -10,6 +10,30 @@ from app.utils.pagination import parse_int
 books_bp = Blueprint("books", __name__)
 
 
+@books_bp.get("/books/<int:book_id>")
+def get_book(book_id: int) -> Any:
+    """Get one book detail
+    ---
+    tags:
+      - Books
+    parameters:
+      - name: book_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      200:
+        description: Book detail
+      404:
+        description: Book not found
+    """
+    payload = library_service.get_book_detail(book_id)
+    if not payload:
+        return jsonify({"error": "Book not found"}), 404
+    return jsonify(payload)
+
+
 @books_bp.get("/books")
 def list_books_offset() -> Any:
     """Search books with offset-limit pagination

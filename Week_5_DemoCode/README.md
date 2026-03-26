@@ -58,10 +58,16 @@ Relationship examples:
 ## 3) Endpoints
 
 - `GET /health`
+- `GET /users`
+- `GET /users/{id}`
 - `GET /users/{id}/loans?status=active&offset=0&limit=10`
+- `POST /users/{id}/loans` with body `{ "book_id": 12, "days": 14 }`
+- `GET /books/{id}`
 - `GET /books?q=python&offset=0&limit=10` (offset/limit)
 - `GET /books/page?q=python&page=1&size=10` (page-based)
 - `GET /books/cursor?q=python&limit=10&cursor=<token>` (cursor)
+- `GET /loans?status=active&offset=0&limit=10`
+- `PATCH /loans/{id}/return`
 
 ## 4) Pagination Comparison
 
