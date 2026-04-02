@@ -3,6 +3,7 @@
 Demo này triển khai:
 - Authentication bằng JWT
 - Refresh token để cấp lại access token
+- OAuth2 (`password grant`, `refresh_token grant`)
 - Authorization theo `roles` và `scopes`
 - Swagger UI để test API trực tiếp
 
@@ -47,6 +48,10 @@ Swagger UI: `http://localhost:5000/swagger`
   - roles: `admin`
   - scopes: `profile:read`, `books:read`, `books:write`, `admin:read`
 
+OAuth2 demo client:
+- `client_id`: `demo-client`
+- `client_secret`: `demo-secret`
+
 ## 4. Quy trình test trên Swagger
 
 1. Gọi `POST /auth/login` với username/password để lấy `access_token` và `refresh_token`.
@@ -60,17 +65,36 @@ Swagger UI: `http://localhost:5000/swagger`
   - `POST /api/books` cần scope `books:write` + role `librarian` hoặc `admin`
   - `GET /api/admin/reports` cần role `admin` + scope `admin:read`
 
-## 5. Danh sách endpoint
+## 5. Quy trình test OAuth2
+
+1. Gọi `POST /oauth/token` với form-data:
+   - Password grant:
+     - `grant_type=password`
+     - `client_id=demo-client`
+     - `client_secret=demo-secret`
+     - `username=bob`
+     - `password=bob123`
+     - `scope=books:read books:write profile:read` (tuỳ chọn)
+2. Lấy `access_token` và `refresh_token` từ response OAuth2.
+3. Dùng `Bearer <access_token>` để gọi endpoint protected (`/api/*`).
+4. Khi cần cấp lại access token, gọi `POST /oauth/token` với:
+   - `grant_type=refresh_token`
+   - `client_id=demo-client`
+   - `client_secret=demo-secret`
+   - `refresh_token=<refresh_token>`
+
+## 6. Danh sách endpoint
 
 - `POST /auth/login`
 - `POST /auth/refresh`
 - `POST /auth/logout`
+- `POST /oauth/token`
 - `GET /api/me`
 - `GET /api/books`
 - `POST /api/books`
 - `GET /api/admin/reports`
 
-## 6. Ghi chú
+## 7. Ghi chú
 
 - Demo dùng in-memory data (user, books, revoked tokens), phù hợp mục đích học tập.
 - Trong production cần:
