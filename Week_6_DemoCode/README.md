@@ -6,6 +6,16 @@ Demo này triển khai:
 - Authorization theo `roles` và `scopes`
 - Swagger UI để test API trực tiếp
 
+## Kiến trúc Layer
+
+- `app.py`: entrypoint, chỉ khởi tạo và chạy app
+- `core/__init__.py`: application factory, wiring các dependency
+- `core/api/*`: presentation layer (REST endpoints)
+- `core/services/*`: business logic layer
+- `core/repositories/*`: data access layer (in-memory cho demo)
+- `core/auth/decorators.py`: authorization decorators theo role/scope
+- `core/config.py`, `core/extensions.py`: cấu hình và extension
+
 ## 1. Cài đặt
 
 ```bash
