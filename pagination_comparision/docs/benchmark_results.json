@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-04-09T11:17:20.257810+00:00",
+  "results": [
+    {
+      "strategy": "offset",
+      "scenario": "deep_jump",
+      "depth": 10,
+      "page_size": 50,
+      "runs": 1,
+      "avg_ms": 1.231,
+      "p95_ms": 1.231,
+      "raw_ms": [
+        1.231
+      ]
+    },
+    {
+      "strategy": "page-size",
+      "scenario": "deep_jump",
+      "depth": 10,
+      "page_size": 50,
+      "runs": 1,
+      "avg_ms": 0.348,
+      "p95_ms": 0.348,
+      "raw_ms": [
+        0.348
+      ]
+    },
+    {
+      "strategy": "cursor",
+      "scenario": "sequential_scan_to_depth",
+      "depth": 10,
+      "page_size": 50,
+      "runs": 1,
+      "avg_ms": 4.517,
+      "p95_ms": 4.517,
+      "raw_ms": [
+        4.517
+      ]
+    }
+  ]
+}
