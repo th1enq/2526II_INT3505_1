@@ -1,0 +1,203 @@
+openapi: 3.0.0
+info:
+  title: Product Management API
+  version: ""
+  description: A simple API for managing products
+paths:
+  /api/products:
+    get:
+      responses:
+        "200":
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+              examples:
+                response:
+                  value:
+                    - id: 1
+                      name: Awesome Product
+                      price: 99.99
+                      description: A very awesome product
+      summary: Get all products
+      operationId: Get all products
+      description: ""
+      tags:
+        - Products
+    post:
+      responses:
+        "201":
+          description: Created
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+              examples:
+                response:
+                  value:
+                    id: 1
+                    name: Awesome Product
+                    price: 99.99
+                    description: A very awesome product
+      summary: Create a new product
+      operationId: Create a new product
+      description: ""
+      tags:
+        - Products
+      requestBody:
+        $ref: "#/components/requestBodies/Create_a_new_productBody"
+  "/api/products/{product_id}":
+    get:
+      responses:
+        "200":
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+              examples:
+                response:
+                  value:
+                    id: 1
+                    name: Awesome Product
+                    price: 99.99
+                    description: A very awesome product
+      summary: Get a product by ID
+      operationId: Get a product by ID
+      description: ""
+      tags:
+        - Products
+      parameters:
+        - name: product_id
+          in: path
+          description: Product ID
+          required: true
+          example: "1"
+          schema:
+            type: number
+    put:
+      responses:
+        "200":
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+              examples:
+                response:
+                  value:
+                    id: 1
+                    name: Awesome Product
+                    price: 99.99
+                    description: A very awesome product
+      summary: Update a product
+      operationId: Update a product
+      description: ""
+      tags:
+        - Products
+      parameters:
+        - name: product_id
+          in: path
+          description: Product ID
+          required: true
+          example: "1"
+          schema:
+            type: number
+      requestBody:
+        $ref: "#/components/requestBodies/Create_a_new_productBody"
+    delete:
+      responses:
+        "200":
+          description: OK
+          headers: {}
+      summary: Delete a product
+      operationId: Delete a product
+      description: ""
+      tags:
+        - Products
+      parameters:
+        - name: product_id
+          in: path
+          description: Product ID
+          required: true
+          example: "1"
+          schema:
+            type: number
+tags:
+  - name: Products
+    description: Product operations
+servers:
+  - url: http://localhost
+components:
+  requestBodies:
+    Create_a_new_productBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Product name
+              price:
+                type: number
+                description: Product price
+              description:
+                type: string
+                description: Product description
+            required:
+              - name
+              - price
+            example:
+              name: Awesome Product
+              price: 99.99
+              description: A very awesome product
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+      properties:
+        id:
+          type: number
+          example: 1
+          description: Product ID
+        name:
+          type: string
+          example: Awesome Product
+          description: Product name
+        price:
+          type: number
+          example: 99.99
+          description: Product price
+        description:
+          type: string
+          example: A very awesome product
+          description: Product description
+    ProductInput:
+      type: object
+      required:
+        - name
+        - price
+      properties:
+        name:
+          type: string
+          example: Awesome Product
+          description: Product name
+        price:
+          type: number
+          example: 99.99
+          description: Product price
+        description:
+          type: string
+          example: A very awesome product
+          description: Product description
+    Products_Collection: {}

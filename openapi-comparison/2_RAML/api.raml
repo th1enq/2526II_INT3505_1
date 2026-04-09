@@ -1,80 +1,102 @@
-#%RAML 1.0
+#%RAML 0.8
 title: Product Management API
 version: 1.0.0
-description: A simple API for managing products
+baseUri: http://localhost
 mediaType: application/json
-baseUri: /
 
-types:
-  ProductInput:
-    type: object
-    properties:
-      name:
-        type: string
-        description: Product name
-      price:
-        type: number
-        description: Product price
-      description:
-        type: string
-        description: Product description
-        required: false
-  Product:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: Product ID
-      name:
-        type: string
-        description: Product name
-      price:
-        type: number
-        description: Product price
-      description:
-        type: string
-        description: Product description
-        required: false
+schemas:
+  - ProductInput: |
+      {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "price": { "type": "number" },
+          "description": { "type": "string" }
+        },
+        "required": ["name", "price"]
+      }
+
+  - Product: |
+      {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "price": { "type": "number" },
+          "description": { "type": "string" }
+        },
+        "required": ["id", "name", "price"]
+      }
 
 /api/products:
   get:
     description: Get all products
     responses:
       200:
-        description: Success
         body:
-          type: Product[]
+          application/json:
+            schema: Product[]
+            example: |
+              [
+                {
+                  "id": 1,
+                  "name": "Awesome Product",
+                  "price": 99.99
+                }
+              ]
+
   post:
     description: Create a new product
     body:
-      type: ProductInput
+      application/json:
+        schema: ProductInput
+        example: |
+          {
+            "name": "Awesome Product",
+            "price": 99.99
+          }
     responses:
       201:
-        description: Success
         body:
-          type: Product
-  /{product_id}:
-    uriParameters:
-      product_id:
-        type: integer
-    get:
-      description: Get a product by ID
-      responses:
-        200:
-          description: Success
-          body:
-            type: Product
-    put:
-      description: Update a product
-      body:
-        type: ProductInput
-      responses:
-        200:
-          description: Success
-          body:
-            type: Product
-    delete:
-      description: Delete a product
-      responses:
-        200:
-          description: Success
+          application/json:
+            schema: Product
+            example: |
+              {
+                "id": 1,
+                "name": "Awesome Product",
+                "price": 99.99
+              }
+
+/api/products/{product_id}:
+  uriParameters:
+    product_id:
+      type: integer
+      required: true
+
+  get:
+    description: Get a product by ID
+    responses:
+      200:
+        body:
+          application/json:
+            schema: Product
+
+  put:
+    description: Update a product
+    body:
+      application/json:
+        schema: ProductInput
+    responses:
+      200:
+        body:
+          application/json:
+            schema: Product
+
+  delete:
+    description: Delete a product
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              { "message": "Deleted successfully" }

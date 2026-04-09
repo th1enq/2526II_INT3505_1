@@ -1,0 +1,12 @@
+Usage: apib2openapi [options]
+
+Convert API Blueprint to OpenAPI 3.0.0
+
+Options:
+  -V, --version                             output the version number
+  -i, --input <file>                        Path to input (API Blueprint) file - default: STDIN
+  -o, --output <file>                       Path to output (OpenAPI) file - default: STDOUT
+  -y, --yaml                                Output as yaml instead of json
+  -1, --apib2swagger-options <keyvalue>     Pass an option to the apib2swagger converter (default: {})
+  -2, --swagger2openapi-options <keyvalue>  Pass an option to the swagger2openapi converter (default: {})
+  -h, --help                                display help for command
