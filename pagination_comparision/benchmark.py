@@ -104,7 +104,14 @@ def _time_query(conn: psycopg.Connection, query: str, params: tuple[Any, ...]) -
     return (ended - started) * 1000
 
 
-def bench_offset(conn: psycopg.Connection, depth: int, page_size: int, runs: int) -> TimingResult:
+def _bench_offset_limit(
+    conn: psycopg.Connection,
+    *,
+    strategy: str,
+    depth: int,
+    page_size: int,
+    runs: int,
+) -> TimingResult:
     offset = depth * page_size
     query = """
         SELECT id, created_at, payload
@@ -114,21 +121,27 @@ def bench_offset(conn: psycopg.Connection, depth: int, page_size: int, runs: int
         LIMIT %s
     """
     latencies = [_time_query(conn, query, (offset, page_size)) for _ in range(runs)]
-    return TimingResult("offset", "deep_jump", depth, page_size, runs, latencies)
+    return TimingResult(strategy, "deep_jump", depth, page_size, runs, latencies)
+
+
+def bench_offset(conn: psycopg.Connection, depth: int, page_size: int, runs: int) -> TimingResult:
+    return _bench_offset_limit(
+        conn,
+        strategy="offset",
+        depth=depth,
+        page_size=page_size,
+        runs=runs,
+    )
 
 
 def bench_page_size(conn: psycopg.Connection, depth: int, page_size: int, runs: int) -> TimingResult:
-    page = depth + 1
-    offset = (page - 1) * page_size
-    query = """
-        SELECT id, created_at, payload
-        FROM items
-        ORDER BY created_at DESC, id DESC
-        OFFSET %s
-        LIMIT %s
-    """
-    latencies = [_time_query(conn, query, (offset, page_size)) for _ in range(runs)]
-    return TimingResult("page-size", "deep_jump", depth, page_size, runs, latencies)
+    return _bench_offset_limit(
+        conn,
+        strategy="page-size",
+        depth=depth,
+        page_size=page_size,
+        runs=runs,
+    )
 
 
 def bench_cursor_scan(conn: psycopg.Connection, depth: int, page_size: int, runs: int) -> TimingResult:

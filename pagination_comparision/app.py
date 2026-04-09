@@ -20,6 +20,14 @@ logging.basicConfig(
 app.logger.handlers = logging.getLogger().handlers
 app.logger.setLevel(logging.INFO)
 
+ITEMS_ORDERED_QUERY = """
+    SELECT id, created_at, payload
+    FROM items
+    ORDER BY created_at DESC, id DESC
+    OFFSET %s
+    LIMIT %s
+"""
+
 
 def _parse_positive_int(value: str, default: int, max_value: int = 1000) -> int:
     if value is None:
@@ -59,6 +67,10 @@ def _execute_timed_query(query: str, params: tuple, strategy: str):
     return rows
 
 
+def _execute_ordered_items_window(offset: int, limit: int, strategy: str):
+    return _execute_timed_query(ITEMS_ORDERED_QUERY, (offset, limit), strategy=strategy)
+
+
 def _execute_timed_insert(payload: str, created_at: Optional[dt.datetime]):
     query = """
         INSERT INTO items (created_at, payload)
@@ -79,6 +91,15 @@ def _execute_timed_insert(payload: str, created_at: Optional[dt.datetime]):
     return row
 
 
+def _parse_created_at(value: object) -> Optional[dt.datetime]:
+    if value is None:
+        return None
+    try:
+        return dt.datetime.fromisoformat(str(value))
+    except ValueError as exc:
+        raise ValueError("created_at must be ISO format") from exc
+
+
 @app.get("/health")
 def health() -> tuple[dict, int]:
     return {"status": "ok"}, 200
@@ -89,13 +110,10 @@ def insert_item():
     data = request.get_json(silent=True) or {}
     payload = str(data.get("payload") or f"insert-{uuid.uuid4()}")
 
-    created_at_raw = data.get("created_at")
-    created_at = None
-    if created_at_raw:
-        try:
-            created_at = dt.datetime.fromisoformat(str(created_at_raw))
-        except ValueError:
-            return jsonify({"error": "created_at must be ISO format"}), 400
+    try:
+        created_at = _parse_created_at(data.get("created_at"))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
 
     row = _execute_timed_insert(payload, created_at)
     return jsonify({"inserted": row}), 201
@@ -111,15 +129,7 @@ def offset_pagination():
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
 
-    query = """
-        SELECT id, created_at, payload
-        FROM items
-        ORDER BY created_at DESC, id DESC
-        OFFSET %s
-        LIMIT %s
-    """
-
-    rows = _execute_timed_query(query, (offset, limit), strategy="offset")
+    rows = _execute_ordered_items_window(offset, limit, strategy="offset")
 
     return jsonify(
         {
@@ -141,15 +151,7 @@ def page_size_pagination():
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
 
-    query = """
-        SELECT id, created_at, payload
-        FROM items
-        ORDER BY created_at DESC, id DESC
-        OFFSET %s
-        LIMIT %s
-    """
-
-    rows = _execute_timed_query(query, (offset, size), strategy="page-size")
+    rows = _execute_ordered_items_window(offset, size, strategy="page-size")
 
     return jsonify(
         {
