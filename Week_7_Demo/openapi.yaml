@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info:
+  title: Product API
+  version: 1.0.0
+  description: OpenAPI-first CRUD backend for products using Flask + MongoDB.
+servers:
+  - url: /api
+paths:
+  /products:
+    get:
+      operationId: app.handlers.products.list_products
+      summary: List products
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      operationId: app.handlers.products.create_product
+      summary: Create product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid payload
+  /products/{product_id}:
+    get:
+      operationId: app.handlers.products.get_product
+      summary: Get product by id
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+    put:
+      operationId: app.handlers.products.update_product
+      summary: Update product by id
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid payload
+        '404':
+          description: Product not found
+    delete:
+      operationId: app.handlers.products.delete_product
+      summary: Delete product by id
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '204':
+          description: Product deleted
+        '404':
+          description: Product not found
+components:
+  parameters:
+    ProductId:
+      name: product_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId string
+  schemas:
+    ProductInput:
+      type: object
+      required:
+        - name
+        - price
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+          minimum: 0
+        stock:
+          type: integer
+          minimum: 0
+          default: 0
+    Product:
+      allOf:
+        - $ref: '#/components/schemas/ProductInput'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string

@@ -1,0 +1,170 @@
+openapi: 3.0.3
+info:
+  description: OpenAPI-first CRUD backend for products using Flask + MongoDB.
+  title: Product API
+  version: 1.0.0
+servers:
+- url: /api
+paths:
+  /products:
+    get:
+      operationId: app_handlers_products_list_products
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Product"
+                type: array
+          description: Product list
+      summary: List products
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+    post:
+      operationId: app_handlers_products_create_product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+          description: Product created
+        "400":
+          description: Invalid payload
+      summary: Create product
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+  /products/{product_id}:
+    delete:
+      operationId: app_handlers_products_delete_product
+      parameters:
+      - description: MongoDB ObjectId string
+        explode: false
+        in: path
+        name: product_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Product deleted
+        "404":
+          description: Product not found
+      summary: Delete product by id
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+    get:
+      operationId: app_handlers_products_get_product
+      parameters:
+      - description: MongoDB ObjectId string
+        explode: false
+        in: path
+        name: product_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+          description: Product found
+        "404":
+          description: Product not found
+      summary: Get product by id
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+    put:
+      operationId: app_handlers_products_update_product
+      parameters:
+      - description: MongoDB ObjectId string
+        explode: false
+        in: path
+        name: product_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+          description: Product updated
+        "400":
+          description: Invalid payload
+        "404":
+          description: Product not found
+      summary: Update product by id
+      x-openapi-router-controller: openapi_server.controllers.default_controller
+components:
+  parameters:
+    ProductId:
+      description: MongoDB ObjectId string
+      explode: false
+      in: path
+      name: product_id
+      required: true
+      schema:
+        type: string
+      style: simple
+  schemas:
+    ProductInput:
+      example:
+        price: 0.08008281904610115
+        name: name
+        description: description
+        stock: 0
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          title: name
+          type: string
+        description:
+          nullable: true
+          title: description
+          type: string
+        price:
+          minimum: 0
+          title: price
+          type: number
+        stock:
+          default: 0
+          minimum: 0
+          title: stock
+          type: integer
+      required:
+      - name
+      - price
+      title: ProductInput
+      type: object
+    Product:
+      allOf:
+      - $ref: "#/components/schemas/ProductInput"
+      - properties:
+          id:
+            type: string
+        required:
+        - id
+        type: object
+      example:
+        price: 0.08008281904610115
+        name: name
+        description: description
+        id: id
+        stock: 0
+      title: Product
