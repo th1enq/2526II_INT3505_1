@@ -1,0 +1,12 @@
+{
+  "name": "flask-demo-quality-gate",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Newman tests for Flask demo app",
+  "scripts": {
+    "test:api": "newman run postman/flask-demo.postman_collection.json -e postman/local.postman_environment.json"
+  },
+  "devDependencies": {
+    "newman": "^6.1.3"
+  }
+}
