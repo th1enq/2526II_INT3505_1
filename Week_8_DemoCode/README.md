@@ -63,11 +63,24 @@ npm install
 npm run test:api
 ```
 
+Collection hiện kiểm tra gần như tương đương bộ `pytest`:
+
+- `GET /health`
+- `GET /api/info`
+- `POST /api/echo` cho cả case hợp lệ và thiếu `message`
+- `POST /api/math/sum` cho cả case hợp lệ, danh sách rỗng và phần tử không phải số
+- CRUD cho `items`, gồm: danh sách ban đầu rỗng, tạo item, lấy theo id, kiểm tra list sau khi tạo, xoá item, xác nhận `404` sau khi xoá
+
 ### Performance test (k6)
 
 ```bash
 k6 run performance/k6-smoke.js
 ```
+
+Script `k6` được tách thành 2 scenario:
+
+- `smoke_api`: tạo tải cho các endpoint stateless (`/health`, `/api/info`, `/api/echo`, `/api/math/sum`)
+- `functional_crud`: chạy tuần tự để kiểm tra validation và CRUD flow của `items` với các `check` chặt hơn, tránh sai lệch do concurrent writes
 
 Nếu chưa cài `k6`, có thể chạy bằng Docker:
 
@@ -84,6 +97,7 @@ BASE_URL=http://127.0.0.1:5000 k6 run performance/k6-smoke.js
 ## 3) API nhanh
 
 - `GET /health`
+- `GET /api/info`
 - `POST /api/echo` với body JSON:
 
 ```json
@@ -91,6 +105,26 @@ BASE_URL=http://127.0.0.1:5000 k6 run performance/k6-smoke.js
   "message": "hello"
 }
 ```
+
+- `POST /api/math/sum` với body JSON:
+
+```json
+{
+  "numbers": [1, 2, 3.5]
+}
+```
+
+- `GET /api/items`
+- `POST /api/items` với body JSON:
+
+```json
+{
+  "name": "notebook"
+}
+```
+
+- `GET /api/items/{item_id}`
+- `DELETE /api/items/{item_id}`
 
 ## 4) CI/CD
 

@@ -1,0 +1,222 @@
+openapi: 3.0.0
+info:
+  description: A simple API for managing products
+  title: Product Management API
+  version: ""
+servers:
+- url: http://localhost
+tags:
+- description: Product operations
+  name: Products
+paths:
+  /api/products:
+    get:
+      description: ""
+      operationId: get_all_products
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                  - id: 1
+                    name: Awesome Product
+                    price: 99.99
+                    description: A very awesome product
+              schema:
+                items: {}
+                type: array
+          description: OK
+      summary: Get all products
+      tags:
+      - Products
+      x-openapi-router-controller: openapi_server.controllers.products_controller
+    post:
+      description: ""
+      operationId: create_a_new_product
+      requestBody:
+        $ref: "#/components/requestBodies/Create_a_new_productBody"
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    id: 1
+                    name: Awesome Product
+                    price: 99.99
+                    description: A very awesome product
+              schema:
+                $ref: "#/components/schemas/Product"
+          description: Created
+      summary: Create a new product
+      tags:
+      - Products
+      x-openapi-router-controller: openapi_server.controllers.products_controller
+  /api/products/{product_id}:
+    delete:
+      description: ""
+      operationId: delete_a_product
+      parameters:
+      - description: Product ID
+        example: "1"
+        explode: false
+        in: path
+        name: product_id
+        required: true
+        schema:
+          type: number
+        style: simple
+      responses:
+        "200":
+          description: OK
+      summary: Delete a product
+      tags:
+      - Products
+      x-openapi-router-controller: openapi_server.controllers.products_controller
+    get:
+      description: ""
+      operationId: get_a_product_by_id
+      parameters:
+      - description: Product ID
+        example: "1"
+        explode: false
+        in: path
+        name: product_id
+        required: true
+        schema:
+          type: number
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    id: 1
+                    name: Awesome Product
+                    price: 99.99
+                    description: A very awesome product
+              schema:
+                $ref: "#/components/schemas/Product"
+          description: OK
+      summary: Get a product by ID
+      tags:
+      - Products
+      x-openapi-router-controller: openapi_server.controllers.products_controller
+    put:
+      description: ""
+      operationId: update_a_product
+      parameters:
+      - description: Product ID
+        example: "1"
+        explode: false
+        in: path
+        name: product_id
+        required: true
+        schema:
+          type: number
+        style: simple
+      requestBody:
+        $ref: "#/components/requestBodies/Create_a_new_productBody"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    id: 1
+                    name: Awesome Product
+                    price: 99.99
+                    description: A very awesome product
+              schema:
+                $ref: "#/components/schemas/Product"
+          description: OK
+      summary: Update a product
+      tags:
+      - Products
+      x-openapi-router-controller: openapi_server.controllers.products_controller
+components:
+  requestBodies:
+    Create_a_new_productBody:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Create_a_new_product_request"
+  schemas:
+    Product:
+      example:
+        price: 99.99
+        name: Awesome Product
+        description: A very awesome product
+        id: 1
+      properties:
+        id:
+          description: Product ID
+          example: 1
+          title: id
+          type: number
+        name:
+          description: Product name
+          example: Awesome Product
+          title: name
+          type: string
+        price:
+          description: Product price
+          example: 99.99
+          title: price
+          type: number
+        description:
+          description: Product description
+          example: A very awesome product
+          title: description
+          type: string
+      required:
+      - id
+      - name
+      - price
+      title: Product
+      type: object
+    ProductInput:
+      properties:
+        name:
+          description: Product name
+          example: Awesome Product
+          type: string
+        price:
+          description: Product price
+          example: 99.99
+          type: number
+        description:
+          description: Product description
+          example: A very awesome product
+          type: string
+      required:
+      - name
+      - price
+      type: object
+    Products_Collection: {}
+    Create_a_new_product_request:
+      example:
+        name: Awesome Product
+        price: 99.99
+        description: A very awesome product
+      properties:
+        name:
+          description: Product name
+          type: string
+        price:
+          description: Product price
+          type: number
+        description:
+          description: Product description
+          type: string
+      required:
+      - name
+      - price
+      title: Create_a_new_product_request
+      type: object

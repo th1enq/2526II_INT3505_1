@@ -2,8 +2,18 @@
   "info": {
     "name": "Flask Demo API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Collection for Flask demo app"
+    "description": "Collection for Flask demo app with regression-style assertions"
   },
+  "variable": [
+    {
+      "key": "createdItemId",
+      "value": ""
+    },
+    {
+      "key": "createdItemName",
+      "value": ""
+    }
+  ],
   "item": [
     {
       "name": "Health Check",
@@ -29,9 +39,10 @@
               "pm.test('Status code is 200', function () {",
               "    pm.response.to.have.status(200);",
               "});",
-              "pm.test('Body contains status ok', function () {",
+              "",
+              "pm.test('Health payload is correct', function () {",
               "    const body = pm.response.json();",
-              "    pm.expect(body.status).to.eql('ok');",
+              "    pm.expect(body).to.eql({ status: 'ok', service: 'flask-demo' });",
               "});"
             ]
           }
@@ -39,7 +50,42 @@
       ]
     },
     {
-      "name": "Echo Message",
+      "name": "App Info",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/info",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "info"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('App info payload is correct', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.eql({ name: 'flask-demo', version: '1.0.0' });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Echo Message Success",
       "request": {
         "method": "POST",
         "header": [
@@ -72,9 +118,565 @@
               "pm.test('Status code is 200', function () {",
               "    pm.response.to.have.status(200);",
               "});",
-              "pm.test('Echo returns input message', function () {",
+              "",
+              "pm.test('Echo returns input message and timestamp', function () {",
               "    const body = pm.response.json();",
               "    pm.expect(body.message).to.eql('hello-from-newman');",
+              "    pm.expect(body.received_at).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Echo Message Missing Field",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/echo",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "echo"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Echo validation error is correct', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.eql({ error: \"Field 'message' is required\" });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sum Numbers Success",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numbers\": [1, 2.5, 3]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/math/sum",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "math",
+            "sum"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Sum response is correct', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.eql({ count: 3, sum: 6.5 });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sum Numbers Empty List",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numbers\": []\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/math/sum",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "math",
+            "sum"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Empty numbers validation error is correct', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.eql({ error: \"Field 'numbers' must be a non-empty list\" });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sum Numbers Non Numeric Element",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numbers\": [1, \"2\", 3]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/math/sum",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "math",
+            "sum"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Non numeric validation error is correct', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.eql({ error: \"All elements in 'numbers' must be numeric\" });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Items Initially Empty",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "items"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Items list starts empty', function () {",
+              "    pm.expect(pm.response.json()).to.eql([]);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Item Success",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"  notebook  \"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "items"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('Created item is normalized and stored', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.id).to.eql(1);",
+              "    pm.expect(body.name).to.eql('notebook');",
+              "    pm.expect(body.created_at).to.be.a('string').and.not.empty;",
+              "    pm.collectionVariables.set('createdItemId', String(body.id));",
+              "    pm.collectionVariables.set('createdItemName', body.name);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Item Missing Name",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "items"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Item validation error is correct', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.eql({ error: \"Field 'name' is required\" });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Created Item",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/items/{{createdItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "items",
+            "{{createdItemId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Fetched item matches created item', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('createdItemId')));",
+              "    pm.expect(body.name).to.eql(pm.collectionVariables.get('createdItemName'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Items After Create",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "items"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Created item appears in list', function () {",
+              "    const items = pm.response.json();",
+              "    const createdItemId = Number(pm.collectionVariables.get('createdItemId'));",
+              "    pm.expect(items).to.be.an('array').with.lengthOf(1);",
+              "    pm.expect(items[0].id).to.eql(createdItemId);",
+              "    pm.expect(items[0].name).to.eql(pm.collectionVariables.get('createdItemName'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Item Not Found",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/items/999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "items",
+            "999"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test('Missing item error is correct', function () {",
+              "    pm.expect(pm.response.json()).to.eql({ error: 'Item not found' });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete Created Item",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/items/{{createdItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "items",
+            "{{createdItemId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 204', function () {",
+              "    pm.response.to.have.status(204);",
+              "});",
+              "",
+              "pm.test('Delete response body is empty', function () {",
+              "    pm.expect(pm.response.text()).to.eql('');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete Item Not Found",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/items/999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "items",
+            "999"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test('Delete missing item error is correct', function () {",
+              "    pm.expect(pm.response.json()).to.eql({ error: 'Item not found' });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Confirm Item Deleted",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/items/{{createdItemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "items",
+            "{{createdItemId}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test('Deleted item is no longer available', function () {",
+              "    pm.expect(pm.response.json()).to.eql({ error: 'Item not found' });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List Items After Delete",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "items"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Items list is empty again', function () {",
+              "    pm.expect(pm.response.json()).to.eql([]);",
               "});"
             ]
           }
