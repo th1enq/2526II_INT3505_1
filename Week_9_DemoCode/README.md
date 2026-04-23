@@ -6,6 +6,14 @@ Demo web server bằng Flask để minh họa:
 - Kế hoạch migration từ v1 sang v2
 - Case study nâng cấp API thanh toán
 
+## Kiến trúc code (product-style)
+- `app.py`: entrypoint mỏng, tạo app qua factory
+- `api_demo/__init__.py`: `create_app()` và wiring blueprint
+- `api_demo/routes.py`: chỉ chứa HTTP routes/controller
+- `api_demo/config.py`: constants và dữ liệu mẫu
+- `api_demo/services/*`: business logic (versioning, deprecation, openapi, users)
+- `api_demo/openapi_meta.py`: metadata mô tả operation cho OpenAPI
+
 ## 1) Cài đặt
 ```bash
 python3 -m venv .venv

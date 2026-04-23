@@ -159,6 +159,30 @@
           }
         }
       }
+    },
+    "/openapi.json": {
+      "get": {
+        "operationId": "openapi_spec_get",
+        "summary": "Get OpenAPI spec",
+        "description": "Returns auto-generated OpenAPI 3.0.3 document.",
+        "responses": {
+          "200": {
+            "description": "OpenAPI document"
+          }
+        }
+      }
+    },
+    "/docs": {
+      "get": {
+        "operationId": "swagger_ui_get",
+        "summary": "Swagger UI",
+        "description": "Interactive API docs powered by Swagger UI.",
+        "responses": {
+          "200": {
+            "description": "Swagger UI HTML"
+          }
+        }
+      }
     }
   }
 }
