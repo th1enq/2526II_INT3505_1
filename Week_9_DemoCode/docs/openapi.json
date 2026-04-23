@@ -1,0 +1,164 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Flask API Versioning Demo",
+    "version": "2.0.0",
+    "description": "Auto-generated OpenAPI spec from Flask app code."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:5000"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health_check_get",
+        "summary": "Health check",
+        "description": "Returns service status and UTC timestamp.",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "ok",
+                  "timestamp": "2026-04-23T12:00:00+00:00"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v{version}/users": {
+      "get": {
+        "operationId": "users_by_url_version_get",
+        "summary": "Get users by URL version",
+        "description": "Versioning by URL path: /api/v1/users or /api/v2/users.",
+        "responses": {
+          "200": {
+            "description": "Users payload for selected version"
+          },
+          "400": {
+            "description": "Unsupported API version"
+          }
+        },
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/users": {
+      "get": {
+        "operationId": "users_by_header_or_query_version_get",
+        "summary": "Get users by header/query version",
+        "description": "Versioning by query param, X-API-Version, or Accept media type.",
+        "responses": {
+          "200": {
+            "description": "Users payload for selected version"
+          },
+          "400": {
+            "description": "Unsupported API version"
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "version",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                1,
+                2
+              ]
+            },
+            "description": "API version by query parameter."
+          },
+          {
+            "in": "header",
+            "name": "X-API-Version",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "v2"
+            },
+            "description": "API version header."
+          },
+          {
+            "in": "header",
+            "name": "Accept",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "application/vnd.demo.v2+json"
+            },
+            "description": "Media type based versioning."
+          }
+        ]
+      }
+    },
+    "/api/v1/payments": {
+      "post": {
+        "operationId": "create_payment_v1_post",
+        "summary": "Create payment (v1, deprecated)",
+        "description": "Legacy payment API. Deprecated and scheduled for sunset.",
+        "responses": {
+          "201": {
+            "description": "Legacy payment created"
+          },
+          "400": {
+            "description": "Invalid request"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "amount": 100,
+                "currency": "USD"
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/v2/payments": {
+      "post": {
+        "operationId": "create_payment_v2_post",
+        "summary": "Create payment (v2)",
+        "description": "New payment API with required customer_id and richer lifecycle.",
+        "responses": {
+          "201": {
+            "description": "Payment authorized"
+          },
+          "400": {
+            "description": "Missing required fields"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "amount": 100,
+                "currency": "USD",
+                "customer_id": "cus_123"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
