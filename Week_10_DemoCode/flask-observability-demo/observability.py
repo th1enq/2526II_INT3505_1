@@ -1,8 +1,6 @@
-import json
 import logging
 import time
 import uuid
-from typing import Callable
 
 from flask import Flask, Response, g, has_request_context, request
 from pythonjsonlogger import jsonlogger
@@ -32,6 +30,7 @@ def setup_logging(app: Flask) -> None:
         root.removeHandler(h)
 
     handler = logging.StreamHandler()
+    handler.addFilter(RequestContextFilter())
     fmt = app.config.get("LOG_FORMAT", "json")
     if fmt == "json":
         formatter = jsonlogger.JsonFormatter(
@@ -42,9 +41,32 @@ def setup_logging(app: Flask) -> None:
             "%(asctime)s %(levelname)s %(name)s %(message)s request_id=%(request_id)s trace_id=%(trace_id)s"
         )
 
-    handler.addFilter(RequestContextFilter())
     handler.setFormatter(formatter)
     root.addHandler(handler)
+
+    audit_logger = logging.getLogger("audit")
+    audit_logger.setLevel(log_level)
+    audit_logger.propagate = False
+
+    for h in list(audit_logger.handlers):
+        audit_logger.removeHandler(h)
+
+    audit_handler = logging.StreamHandler()
+    audit_handler.addFilter(RequestContextFilter())
+
+    if fmt == "json":
+        audit_formatter = jsonlogger.JsonFormatter(
+            "%(asctime)s %(levelname)s %(name)s %(event)s %(method)s %(path)s %(status)s %(remote_addr)s "
+            "%(user_agent)s %(latency_seconds)s %(request_id)s %(trace_id)s %(span_id)s"
+        )
+    else:
+        audit_formatter = logging.Formatter(
+            "%(asctime)s %(levelname)s %(name)s event=%(event)s method=%(method)s path=%(path)s status=%(status)s "
+            "ip=%(remote_addr)s ua=%(user_agent)s latency=%(latency_seconds)s request_id=%(request_id)s trace_id=%(trace_id)s"
+        )
+
+    audit_handler.setFormatter(audit_formatter)
+    audit_logger.addHandler(audit_handler)
 
 
 def _get_trace_ids() -> tuple[str | None, str | None]:
@@ -86,7 +108,6 @@ def init_request_context(app: Flask) -> None:
 
 def init_audit_logging(app: Flask) -> None:
     audit_logger = logging.getLogger("audit")
-    audit_logger.propagate = True
 
     @app.after_request
     def _audit(resp: Response) -> Response:
@@ -95,7 +116,6 @@ def init_audit_logging(app: Flask) -> None:
             latency = (time.perf_counter() - start) if start else None
             payload = {
                 "event": "http_request",
-                "request_id": getattr(g, "request_id", None),
                 "method": request.method,
                 "path": request.path,
                 "status": resp.status_code,
@@ -103,7 +123,7 @@ def init_audit_logging(app: Flask) -> None:
                 "user_agent": request.headers.get("User-Agent"),
                 "latency_seconds": latency,
             }
-            audit_logger.info(json.dumps(payload))
+            audit_logger.info("http_request", extra=payload)
         except Exception:
             audit_logger.exception("audit_log_failed")
         return resp
