@@ -5,11 +5,24 @@ Nhận webhook từ dịch vụ thanh toán và gửi thông báo cho khách hà
 from flask import Flask, request, jsonify
 from datetime import datetime
 import json
+import os
+import threading
+import time
+
+import redis
 
 app = Flask(__name__)
 
 # Database giả để lưu trữ các notification
 notifications_db = {}
+email_jobs_db = {}
+
+# Redis message queue configuration
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+EMAIL_QUEUE_NAME = os.getenv('EMAIL_QUEUE_NAME', 'notification:email_queue')
+DEFAULT_CUSTOMER_EMAIL = os.getenv('DEFAULT_CUSTOMER_EMAIL', 'thienchy3305@gmail.com')
+
+redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
 
 @app.route('/webhook/payment', methods=['POST'])
 def receive_payment_webhook():
@@ -53,6 +66,125 @@ def receive_payment_webhook():
             'status': 'error',
             'message': str(e)
         }), 500
+
+
+@app.route('/webhook/customer', methods=['POST'])
+def receive_customer_webhook():
+    """
+    Webhook endpoint để nhận sự kiện khách hàng đăng ký thành công.
+    Email được đẩy vào Redis queue và worker xử lý bất đồng bộ.
+    """
+    try:
+        webhook_data = request.get_json()
+
+        if not webhook_data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid JSON payload'
+            }), 400
+
+        event_type = webhook_data.get('event')
+        event_data = webhook_data.get('data', {})
+
+        print(f"\n📨 Received customer webhook event: {event_type}")
+        print(f"Payload: {json.dumps(webhook_data, indent=2, ensure_ascii=False)}")
+
+        if event_type == 'customer.registered':
+            job_id = enqueue_registration_email(event_data)
+
+            return jsonify({
+                'status': 'success',
+                'message': 'Registration email job queued',
+                'job_id': job_id
+            }), 202
+
+        return jsonify({
+            'status': 'error',
+            'message': f'Unknown event type: {event_type}'
+        }), 400
+
+    except redis.RedisError as e:
+        print(f"❌ Redis error while queueing email: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Email queue is not available'
+        }), 503
+    except Exception as e:
+        print(f"❌ Error processing customer webhook: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+def enqueue_registration_email(customer_data):
+    """
+    Đưa email chào mừng vào Redis queue để worker gửi bất đồng bộ.
+    """
+    job_id = f"EMAIL{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
+    customer_name = customer_data.get('customer_name', customer_data.get('name', 'Customer'))
+    customer_email = customer_data.get('customer_email', customer_data.get('email', DEFAULT_CUSTOMER_EMAIL))
+
+    email_job = {
+        'job_id': job_id,
+        'event': 'customer.registered',
+        'customer_id': customer_data.get('customer_id', ''),
+        'customer_name': customer_name,
+        'to_email': customer_email,
+        'subject': 'Đăng ký tài khoản thành công',
+        'body': (
+            f"Xin chào {customer_name},\n\n"
+            "Tài khoản của bạn đã được đăng ký thành công.\n"
+            "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi."
+        ),
+        'status': 'queued',
+        'created_at': datetime.now().isoformat(),
+        'sent_at': None,
+        'error': None
+    }
+
+    email_jobs_db[job_id] = email_job
+    redis_client.rpush(EMAIL_QUEUE_NAME, json.dumps(email_job, ensure_ascii=False))
+
+    print(f"📬 Registration email queued: {job_id}")
+    print(f"   To: {customer_email}")
+
+    return job_id
+
+
+def email_worker():
+    """
+    Worker nền lấy email job từ Redis queue và gửi email.
+    BLPOP giúp worker chờ job mới mà không cần polling liên tục.
+    """
+    print(f"📮 Email worker listening on Redis queue: {EMAIL_QUEUE_NAME}")
+
+    while True:
+        try:
+            _, raw_job = redis_client.blpop(EMAIL_QUEUE_NAME)
+            email_job = json.loads(raw_job)
+            send_registration_email(email_job)
+        except redis.RedisError as e:
+            print(f"❌ Redis worker error: {str(e)}")
+            time.sleep(3)
+        except Exception as e:
+            print(f"❌ Email worker error: {str(e)}")
+
+
+def send_registration_email(email_job):
+    """
+    Demo gửi email. Trong production có thể thay phần print bằng SMTP/provider thật.
+    """
+    job_id = email_job['job_id']
+    email_job['status'] = 'sent'
+    email_job['sent_at'] = datetime.now().isoformat()
+    email_jobs_db[job_id] = email_job
+
+    print("\n📧 REGISTRATION EMAIL SENT")
+    print(f"Job ID: {job_id}")
+    print(f"To: {email_job['to_email']}")
+    print(f"Subject: {email_job['subject']}")
+    print(email_job['body'])
 
 
 def handle_payment_success(payment_data):
@@ -127,6 +259,35 @@ def get_notifications():
     }), 200
 
 
+@app.route('/api/email-jobs', methods=['GET'])
+def get_email_jobs():
+    """
+    Lấy danh sách các email job đã được queue/xử lý.
+    """
+    return jsonify({
+        'status': 'success',
+        'total': len(email_jobs_db),
+        'data': list(email_jobs_db.values())
+    }), 200
+
+
+@app.route('/api/email-jobs/<job_id>', methods=['GET'])
+def get_email_job(job_id):
+    """
+    Lấy thông tin chi tiết một email job.
+    """
+    if job_id in email_jobs_db:
+        return jsonify({
+            'status': 'success',
+            'data': email_jobs_db[job_id]
+        }), 200
+
+    return jsonify({
+        'status': 'error',
+        'message': 'Email job not found'
+    }), 404
+
+
 @app.route('/api/notifications/<notification_id>', methods=['GET'])
 def get_notification(notification_id):
     """
@@ -153,6 +314,8 @@ def health():
         'status': 'healthy',
         'service': 'Notification Service',
         'total_notifications': len(notifications_db),
+        'total_email_jobs': len(email_jobs_db),
+        'email_queue': EMAIL_QUEUE_NAME,
         'timestamp': datetime.now().isoformat()
     }), 200
 
@@ -160,4 +323,6 @@ def health():
 if __name__ == '__main__':
     print("🚀 Notification Service starting on port 5001...")
     print("⏳ Waiting for webhook events from payment service...")
-    app.run(debug=True, port=5001)
+    print(f"🔌 Redis URL: {REDIS_URL}")
+    threading.Thread(target=email_worker, daemon=True).start()
+    app.run(debug=True, port=5001, use_reloader=False)

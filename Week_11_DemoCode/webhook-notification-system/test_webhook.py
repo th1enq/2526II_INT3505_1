@@ -138,12 +138,45 @@ def check_notification_history():
         print(f"❌ Error: {str(e)}")
 
 
+def test_customer_registration_email():
+    """
+    Test queue email bất đồng bộ khi khách hàng đăng ký thành công.
+    """
+    print("\n" + "="*60)
+    print("TEST 5: Queue Registration Email")
+    print("="*60)
+
+    customer_data = {
+        "event": "customer.registered",
+        "data": {
+            "customer_id": "CUST999",
+            "customer_name": "Khách hàng mới"
+        }
+    }
+
+    print(f"\n📤 Sending customer registration webhook:")
+    print(json.dumps(customer_data, indent=2, ensure_ascii=False))
+
+    try:
+        response = requests.post(
+            f"{NOTIFICATION_SERVICE_URL}/webhook/customer",
+            json=customer_data,
+            timeout=5
+        )
+
+        print(f"\n✅ Response Status: {response.status_code}")
+        print(f"Response Data:")
+        print(json.dumps(response.json(), indent=2, ensure_ascii=False))
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
+
+
 def check_service_health():
     """
     Kiểm tra trạng thái các service
     """
     print("\n" + "="*60)
-    print("TEST 5: Check Service Health")
+    print("TEST 6: Check Service Health")
     print("="*60)
     
     # Check Payment Service
@@ -194,6 +227,9 @@ def main():
         # Kiểm tra lịch sử
         check_payment_history()
         check_notification_history()
+
+        # Test email queue qua Redis
+        test_customer_registration_email()
         
     except Exception as e:
         print(f"\n❌ Test error: {str(e)}")

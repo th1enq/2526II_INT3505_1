@@ -1,6 +1,6 @@
 # Webhook Notification System Demo
 
-Hệ thống demo webhook với hai dịch vụ: **Dịch vụ thanh toán** (Payment Service) và **Dịch vụ thông báo** (Notification Service).
+Hệ thống demo webhook với hai dịch vụ: **Dịch vụ thanh toán** (Payment Service) và **Dịch vụ thông báo** (Notification Service). Notification Service dùng Redis làm message queue để gửi email đăng ký thành công theo luồng bất đồng bộ.
 
 ## 📋 Mô tả hệ thống
 
@@ -18,9 +18,15 @@ Hệ thống demo webhook với hai dịch vụ: **Dịch vụ thanh toán** (Pa
 │                     ↓                                        │
 │  Notification Service (Port 5001)                          │
 │  ├─ POST /webhook/payment    → Receive payment webhook     │
+│  ├─ POST /webhook/customer   → Queue registration email    │
 │  ├─ GET /api/notifications  → Get all notifications        │
+│  ├─ GET /api/email-jobs     → Get queued email jobs        │
 │  ├─ GET /api/notifications/<id> → Get notification detail  │
 │  └─ GET /health             → Service health check         │
+│                     │                                        │
+│                     │ (Redis queue)                          │
+│                     ↓                                        │
+│  Email Worker → Send registration success email             │
 │                                                               │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -32,6 +38,12 @@ Hệ thống demo webhook với hai dịch vụ: **Dịch vụ thanh toán** (Pa
 4. **Notification Service nhận** → Xử lý và gửi thông báo (Email/SMS/Push)
 5. **Khách hàng nhận thông báo**
 
+### Luồng email đăng ký bất đồng bộ
+1. **Customer Service/User Service gửi webhook** → POST /webhook/customer
+2. **Notification Service nhận `customer.registered`** → Đẩy email job vào Redis queue
+3. **Email Worker lấy job từ Redis** → Gửi email chào mừng
+4. Nếu payload không có `customer_email`/`email`, email mặc định là `thienchy3305@gmail.com`
+
 ## 🚀 Cách sử dụng
 
 ### 1. Cài đặt dependencies
@@ -39,7 +51,18 @@ Hệ thống demo webhook với hai dịch vụ: **Dịch vụ thanh toán** (Pa
 pip install -r requirements.txt
 ```
 
-### 2. Chạy Notification Service (Terminal 1)
+### 2. Chạy Redis
+```bash
+docker run --rm -p 6379:6379 redis:7-alpine
+```
+
+Hoặc dùng Redis đang chạy sẵn và cấu hình:
+```bash
+export REDIS_URL=redis://localhost:6379/0
+export DEFAULT_CUSTOMER_EMAIL=thienchy3305@gmail.com
+```
+
+### 3. Chạy Notification Service (Terminal 1)
 ```bash
 python notification_service.py
 ```
@@ -47,9 +70,11 @@ Output:
 ```
 🚀 Notification Service starting on port 5001...
 ⏳ Waiting for webhook events from payment service...
+🔌 Redis URL: redis://localhost:6379/0
+📮 Email worker listening on Redis queue: notification:email_queue
 ```
 
-### 3. Chạy Payment Service (Terminal 2)
+### 4. Chạy Payment Service (Terminal 2)
 ```bash
 python payment_service.py
 ```
@@ -59,7 +84,7 @@ Output:
 📍 Webhook will be sent to: http://localhost:5001/webhook/payment
 ```
 
-### 4. Chạy test script (Terminal 3)
+### 5. Chạy test script (Terminal 3)
 ```bash
 python test_webhook.py
 ```
@@ -136,17 +161,47 @@ Content-Type: application/json
 }
 ```
 
-#### 2. Lấy danh sách thông báo
+#### 2. Webhook nhận sự kiện khách hàng đăng ký thành công
+```bash
+POST /webhook/customer
+Content-Type: application/json
+
+{
+  "event": "customer.registered",
+  "data": {
+    "customer_id": "CUST999",
+    "customer_name": "Khách hàng mới"
+  }
+}
+```
+
+Nếu không truyền `customer_email` hoặc `email`, hệ thống sẽ gửi về email mặc định `thienchy3305@gmail.com`.
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Registration email job queued",
+  "job_id": "EMAIL20240514120530123456"
+}
+```
+
+#### 3. Lấy danh sách thông báo
 ```bash
 GET /api/notifications
 ```
 
-#### 3. Lấy chi tiết thông báo
+#### 4. Lấy danh sách email job
+```bash
+GET /api/email-jobs
+```
+
+#### 5. Lấy chi tiết thông báo
 ```bash
 GET /api/notifications/{notification_id}
 ```
 
-#### 4. Kiểm tra trạng thái
+#### 6. Kiểm tra trạng thái
 ```bash
 GET /health
 ```
@@ -175,6 +230,24 @@ curl http://localhost:5000/api/payments
 curl http://localhost:5001/api/notifications
 ```
 
+### Queue email đăng ký thành công
+```bash
+curl -X POST http://localhost:5001/webhook/customer \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event": "customer.registered",
+    "data": {
+      "customer_id": "CUST999",
+      "customer_name": "Khách hàng mới"
+    }
+  }'
+```
+
+### Lấy danh sách email job
+```bash
+curl http://localhost:5001/api/email-jobs
+```
+
 ## 📁 Cấu trúc tệp
 
 ```
@@ -195,7 +268,8 @@ webhook-notification-system/
 ### Event-Driven Architecture
 - Payment Service là **producer** (tạo sự kiện)
 - Notification Service là **consumer** (tiêu thụ sự kiện)
-- Sự kiện: `payment.success`
+- Redis queue là message broker cho luồng email bất đồng bộ
+- Sự kiện: `payment.success`, `customer.registered`
 
 ### Ưu điểm
 ✅ Real-time notification - Thông báo ngay lập tức
