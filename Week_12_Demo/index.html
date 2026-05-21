@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Developer Portal | Vé Online</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-content">
+        <div class="brand">
+          <div class="logo">VO</div>
+          <div>
+            <div class="brand-title">Vé Online</div>
+            <div class="brand-sub">Developer Portal</div>
+          </div>
+        </div>
+        <nav class="nav">
+          <a href="#docs">Docs</a>
+          <a href="#api">API</a>
+          <a href="#sdk">SDK</a>
+          <a href="#support">Support</a>
+          <button class="btn-outline">Đăng ký API</button>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="badge">API v1 • 99.9% Uptime</span>
+            <h1>Tích hợp bán vé trong vài giờ</h1>
+            <p>
+              Truy cập API phát hành vé, quản lý đơn hàng, và check-in QR.
+              Tài liệu rõ ràng, SDK có sẵn, và hỗ trợ kỹ thuật nhanh.
+            </p>
+            <div class="hero-actions">
+              <button class="btn-primary">Bắt đầu nhanh</button>
+              <button class="btn-ghost">Xem tài liệu</button>
+            </div>
+            <div class="hero-meta">
+              <div>
+                <div class="meta-value">2.1M+</div>
+                <div class="meta-label">vé đã phát hành</div>
+              </div>
+              <div>
+                <div class="meta-value">120+</div>
+                <div class="meta-label">đối tác tích hợp</div>
+              </div>
+              <div>
+                <div class="meta-value">350ms</div>
+                <div class="meta-label">độ trễ trung bình</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-card">
+            <div class="card-header">Quickstart</div>
+            <ol class="steps">
+              <li>Tạo API key trong Dashboard</li>
+              <li>Gọi endpoint tạo sự kiện</li>
+              <li>Phát hành vé và nhận QR</li>
+            </ol>
+            <pre><code>curl -X POST https://api.veonline.vn/events \
+  -H "Authorization: Bearer &lt;API_KEY&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Demo", "date":"2026-07-01"}'</code></pre>
+            <button class="btn-primary full">Tạo API key</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="docs" class="section">
+        <div class="container">
+          <h2>Tài liệu nổi bật</h2>
+          <div class="card-grid">
+            <article class="card">
+              <h3>Authentication</h3>
+              <p>Chuẩn OAuth2 + API key. Hướng dẫn tạo token an toàn.</p>
+              <a href="#">Xem hướng dẫn →</a>
+            </article>
+            <article class="card">
+              <h3>Ticketing API</h3>
+              <p>Phát hành, hủy, đổi vé và quản lý hạng vé.</p>
+              <a href="#">Xem hướng dẫn →</a>
+            </article>
+            <article class="card">
+              <h3>Check-in QR</h3>
+              <p>SDK quét QR, sync offline và chống vé giả.</p>
+              <a href="#">Xem hướng dẫn →</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="api" class="section muted">
+        <div class="container">
+          <h2>API Endpoints chính</h2>
+          <div class="endpoint-grid">
+            <div class="endpoint">
+              <span class="method post">POST</span>
+              <code>/events</code>
+              <p>Tạo sự kiện mới</p>
+            </div>
+            <div class="endpoint">
+              <span class="method get">GET</span>
+              <code>/events/{id}/tickets</code>
+              <p>Lấy danh sách vé</p>
+            </div>
+            <div class="endpoint">
+              <span class="method post">POST</span>
+              <code>/tickets/issue</code>
+              <p>Phát hành vé</p>
+            </div>
+            <div class="endpoint">
+              <span class="method post">POST</span>
+              <code>/checkin</code>
+              <p>Check-in vé bằng QR</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="sdk" class="section">
+        <div class="container">
+          <h2>SDK & Tools</h2>
+          <div class="card-grid">
+            <article class="card">
+              <h3>Node.js SDK</h3>
+              <p>Cài đặt nhanh qua npm và ví dụ tích hợp.</p>
+              <button class="btn-outline">npm install veonline</button>
+            </article>
+            <article class="card">
+              <h3>Mobile Check-in</h3>
+              <p>SDK Android/iOS hỗ trợ offline mode.</p>
+              <button class="btn-outline">Tải SDK</button>
+            </article>
+            <article class="card">
+              <h3>Webhook Monitor</h3>
+              <p>Nhận thông báo realtime về vé và check-in.</p>
+              <button class="btn-outline">Bật Webhook</button>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="support" class="section muted">
+        <div class="container support">
+          <div>
+            <h2>Hỗ trợ kỹ thuật</h2>
+            <p>Slack cộng đồng, ticket hỗ trợ 24/7, và SLA cho đối tác.</p>
+            <div class="support-actions">
+              <button class="btn-primary">Tạo ticket</button>
+              <button class="btn-ghost">Tham gia Slack</button>
+            </div>
+          </div>
+          <div class="status">
+            <div class="status-header">Trạng thái hệ thống</div>
+            <div class="status-body">
+              <div class="status-dot"></div>
+              <div>
+                <div class="status-title">All systems operational</div>
+                <div class="status-sub">Cập nhật 2 phút trước</div>
+              </div>
+            </div>
+            <a href="#">Xem trang trạng thái →</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-content">
+        <div>
+          <div class="brand-title">Vé Online</div>
+          <div class="brand-sub">Kết nối hệ sinh thái bán vé</div>
+        </div>
+        <div class="footer-links">
+          <a href="#">Chính sách</a>
+          <a href="#">Bảo mật</a>
+          <a href="#">Liên hệ</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
